@@ -1,0 +1,13 @@
+caminho_video_p5= rtsp://admin:czcz8910@192.168.42.48/Streaming/Channels/201?transport=tcp
+ip_p5 = 192.168.42.48
+caminho_video_p1= rtsp://admin:czcz8910@192.168.42.49/Streaming/Channels/201?transport=tcp
+ip_p1 = 192.168.42.49
+caminho_output_base= results\Videos\Local
+caminho_output_rede= results\Videos\Rede
+buffer = 0
+caminho_excel=results\Excel\Local\RESULTADOS.xlsx
+caminho_excel_rede= results\Excel\Rede
+API_URL_P5 = http://10.1.2.23:8001
+API_URL_P1 = http://10.1.2.23:8000
+monitor = 1
+
