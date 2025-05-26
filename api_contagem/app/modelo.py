@@ -12,4 +12,5 @@ def carregar_modelo():
     modelo = YOLO(caminho_modelo)
     modelo.eval()
     modelo.to("cuda")
+    print("[YOLO] Modelo carregado com sucesso")
     return modelo
