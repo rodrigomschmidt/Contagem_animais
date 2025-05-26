@@ -7,10 +7,8 @@ import gc
 from utilitarios import trigger_manual_correction, copiar_para_rede, load_config, crop_para_5x4
 from state import parar_event
 
-
 def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial,
-             ordem_entrada, data_abate, ip, rampa, get_frame_func=None, set_frame_callback=None,
-             queue_resultado=None):  # <-- Adicionado parâmetro opcional para multiprocessamento
+             ordem_entrada, data_abate, ip, rampa, get_frame_func=None, set_frame_callback=None):
     gc.collect()
     torch.cuda.empty_cache()
     resultados = None
@@ -44,8 +42,6 @@ def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial
 
     if frame is None or frame.size == 0:
         print("[CONTADOR] Não foi possível obter um frame válido. Abortando contagem.")
-        if queue_resultado:  # <-- Se estiver usando multiprocessamento, retornar None pela fila
-            queue_resultado.put(None)
         return None
 
     print("[CONTADOR] Primeiro frame válido recebido. Iniciando inferência.")
@@ -113,8 +109,8 @@ def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial
                 resultados = modelo.track(
                     half=True,
                     source=frame_atrasado,
-                    conf=0.5,
-                    iou=0.6,
+                    conf=0.7,
+                    iou=0.7,
                     tracker="config/trackers/bytetrack.yaml",
                     persist=True,
                     imgsz=512
@@ -170,9 +166,10 @@ def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial
             if set_frame_callback:
                 set_frame_callback(frame_atrasado)
 
+            # Liberação de memória após uso dos resultados
             del resultados
             gc.collect()
-
+            
             if frame_count % FRAME_CHECK_INTERVAL == 0:
                 torch.cuda.empty_cache()
 
@@ -192,7 +189,4 @@ def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial
     copiar_para_rede(nome_video, nome_video_rede)
     copiar_para_rede(nome_video2, nome_video_rede)
 
-    if queue_resultado:  # <-- Envia contagem de volta via fila se usada com multiprocessing
-        queue_resultado.put(contagem)
-    else:
-        return contagem
+    return contagem

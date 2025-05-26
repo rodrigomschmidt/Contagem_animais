@@ -7,7 +7,6 @@ from threading import Thread
 import cv2
 from fastapi import HTTPException, Response
 from multiprocessing import Process, Queue  # <-- Adicionado para multiprocessamento
-
 router = APIRouter()
 thread: Thread = None
 
@@ -17,32 +16,20 @@ def iniciar(req: RequisicaoContador):
         return {"status": "erro", "mensagem": "Já em execução."}
 
     req_data = req.model_dump()
-    queue_resultado = Queue()  # <-- Fila para capturar resultado do processo
-
-    def monitorar_resultado(queue):  # <-- Thread leve apenas para aguardar contagem
+    def executar():
         estado_contador.executando = True
         estado_contador.stream_pronto = False
         try:
-            estado_contador.ultimo_resultado = queue.get()  # <-- Aguarda retorno da contagem
+            estado_contador.ultimo_resultado = contador(estado_contador.modelo, **req_data, get_frame_func=get_frame_atual, set_frame_callback=set_ultimo_frame)
         finally:
             estado_contador.executando = False
             estado_contador.stream_pronto = False
 
     estado_contador.parar_event.clear()
-
-    processo = Process(target=contador, kwargs={  # <-- Processo separado para o contador
-        "modelo": estado_contador.modelo,
-        **req_data,
-        "get_frame_func": get_frame_atual,
-        "set_frame_callback": set_ultimo_frame,
-        "queue_resultado": queue_resultado
-    })
-    processo.start()
-
     global thread
-    thread = Thread(target=monitorar_resultado, args=(queue_resultado,))  # <-- Thread de monitoramento
+    thread = Thread(target=executar)
     thread.start()
-
+    
     return {"status": "ok", "mensagem": "Contagem iniciada"}
 
 @router.post("/parar")
