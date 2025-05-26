@@ -1,8 +1,0 @@
-.venv/
-dist/
-__pycache__
-*.spec
-build/
-results/
-dataset_cameras_novas/
-resultados/
