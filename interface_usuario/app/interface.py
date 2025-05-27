@@ -76,14 +76,6 @@ def iniciar_interface(root, caminho_excel, dict_placa):
     dict_placa["P5"]["ordem_var"] = tk.StringVar()
     tk.Entry(frame_p5, textvariable=dict_placa["P5"]["ordem_var"], font=fonte, state="readonly").pack(fill=tk.X, padx=5, pady=2)
 
-    # BOTÕES CONFIRMAR E CANCELAR
-    frame_botoes = tk.Frame(frame_esquerda)
-    frame_botoes.pack(side=tk.TOP, fill=tk.X, padx=5, pady=10)
-    tk.Button(frame_botoes, text="Confirmar", command=lambda: confirmar(), bg="green", font=fonte, fg="white")\
-        .pack(side=tk.LEFT, expand=True, fill=tk.X, padx=(0,5))
-    tk.Button(frame_botoes, text="Cancelar", command=lambda: cancelar(), bg="red", font=fonte, fg="white")\
-        .pack(side=tk.RIGHT, expand=True, fill=tk.X, padx=(5,0))
-
     # FRAME DIREITO - TABELAS
     frame_direita = tk.Frame(popup)
     frame_direita.pack(side=tk.RIGHT, padx=10, pady=10)
@@ -175,17 +167,6 @@ def iniciar_interface(root, caminho_excel, dict_placa):
 
         popup.after(30_000, atualizar_tabelas)
 
-        # [opcional] atualizar tree2 de contagens aqui, se necessário
-
     atualizar_tabelas()
-
-    # funções de confirmação e cancelamento (sem alterações)
-    def confirmar():
-        # implementar disparo com placas de P1/P5
-        pass
-
-    def cancelar():
-
-        pass
     
     return tree_sem, tree_com, popup

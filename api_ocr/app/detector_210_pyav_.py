@@ -76,7 +76,7 @@ def leitura_placas(ip_camera, LINHA_P1, LINHA_P2):
         pasta_crops = criar_pasta_run(path_salvamento)
         contador_crops = 1
 
-        model = YOLO(r"app/best_13.05.pt")
+        model = YOLO(r"best_13.05.pt")
         print("[PLACAS] Modelo YOLO carregado com sucesso")
         ocr = PaddleOCR(use_angle_cls=True, use_gpu=True)
         print("[OCR] Modelo PaddleOCR carregado com sucesso")

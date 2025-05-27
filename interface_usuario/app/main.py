@@ -19,7 +19,7 @@ dict_placa = {"P1": {"placa_lida": None, "placa_anterior": None, "estado": None,
               "P5": {"placa_lida": None, "placa_anterior": None, "estado": None, "estado_anterior": None, "ordem_var": None, "placa_var": None}}
 
 dict_payload = { "P1": {
-    "caminho_output_base": None,
+    "caminho_output_base": r"C:\teste_base",
     "caminho_output_rede": r"\\srvbmflserver\BARRAMANSA\PUBLICO_BM\Rodrigo\Videos_novo",
     "placa": None,
     "sequencial": None,
@@ -29,7 +29,7 @@ dict_payload = { "P1": {
     "rampa": "P1"  # ou "P5"
     },
     "P5": {
-    "caminho_output_base": None,
+    "caminho_output_base": r"C:\teste_base",
     "caminho_output_rede": r"\\srvbmflserver\BARRAMANSA\PUBLICO_BM\Rodrigo\Videos_novo",
     "placa": None,
     "sequencial": None,
@@ -73,7 +73,7 @@ def main():
     t1 = threading.Thread(target=loop_placas, args=(dict_url_placas, dict_placa, dict_payload, tree_sem, popup,), daemon=True)
     t1.start()
 
-    t2 = threading.Thread(target=loop_iniciar, args=(url_clp, dict_payload, dict_url_contagem,), daemon=True)
+    t2 = threading.Thread(target=loop_iniciar, args=(url_clp, dict_payload, dict_url_contagem, config, dict_sequenciais,), daemon=True)
     t2.start()
     #registrar_resultado(data_abate, placa, sequencial, contagem, caminho_excel, hora, ordem)
     #copiar_para_rede(caminho_excel, caminho_excel_rede)

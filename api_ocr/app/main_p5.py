@@ -1,7 +1,10 @@
 import os
 import sys
+# Adiciona caminho da DLL do cuDNN
+os.add_dll_directory(r"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin")
+# Evita uso excessivo de threads OpenMP
 os.environ["OMP_NUM_THREADS"] = "1"
-
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),"..")))
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from threading import Thread

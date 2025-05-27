@@ -106,16 +106,18 @@ def loop_placas(dict_url, dict_placa, dict_payload, tree_sem, popup):
             time.sleep(0.5)
 
 
-def loop_iniciar(url_clp, dict_payload, dict_url_contagem, config, dict_sequenciais,):
+def loop_iniciar(url_clp, dict_payload, dict_url_contagem, config, dict_sequenciais):
     estado_anterior = {"P1": False, "P5": False}
-    
+    print("[DEBUG] O LOOP INICIAR ESTÁ ATIVO")
     while True:
         try:
             resp = requests.get(f"{url_clp}/estado_clp", timeout=2)
             if resp.ok:
                 estado = resp.json()
+                print(f"[DEBUG] O estado é = {estado}")
 
                 for rampa in dict_payload.keys():
+                    print("[DEBUG] ESTAMOS DENTRO DO FOR")
                     atual = estado.get(rampa, False)
                     anterior = estado_anterior[rampa]
                     payload = dict_payload[rampa]
