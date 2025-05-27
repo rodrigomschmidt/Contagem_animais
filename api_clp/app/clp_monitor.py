@@ -5,12 +5,15 @@ from botoes_clp import botoes
 import time
 import requests
 
-payload_em_espera = {}
 monitorando_clp = True
 config = load_config("config_clp.txt")
-API_URL_CONTAGEM = config["API_URL"]
 api_urls = {"P1": config["API_URL_P1"], "P5": config["API_URL_P5"]}
 executando = {}
+liberar_contagem = {"P1": False, "P5": False}
+
+def get_liberar_contagem():
+    global liberar_contagem
+    return liberar_contagem
 
 def verificar_executando(url):
     try:
@@ -22,38 +25,16 @@ def verificar_executando(url):
     return False
 
 def escutar_clp():
-    global payload_em_espera, executando
+    global executando
 
     deque_abertura = {"P1": deque(maxlen=5), "P5": deque(maxlen=5)}
     deque_fechamento = {"P1": deque(maxlen=5), "P5": deque(maxlen=5)}
     
-    CLP_IP = '10.1.3.220'  # ✅ Ajuste se necessário
+    CLP_IP = '10.1.3.220'  
     PORTA = 502
     UNIT_ID = 1
     ENDERECO_INICIAL = 16882
     INTERVALO_LEITURA = 0.4  # segundos
-
-    payload_p1 = {
-    "caminho_output_base": "C:/teste_base",
-    "caminho_output_rede": "C:/teste_rede",
-    "placa": "TESTE123",
-    "sequencial": "1",
-    "ordem_entrada": "0000",
-    "data_abate": "29/04/2025",
-    "ip": config["ip_p1"],  # ou config["ip_p5"] dependendo do botão
-    "rampa": "P1"  # ou "P5"
-    }
-
-    payload_p5 = {
-        "caminho_output_base": "C:/teste_base",
-        "caminho_output_rede": "C:/teste_rede",
-        "placa": "TESTE123",
-        "sequencial": "1",
-        "ordem_entrada": "0000",
-        "data_abate": "29/04/2025",
-        "ip": config["ip_p5"],  # ou config["ip_p5"] dependendo do botão
-        "rampa": "P5"  # ou "P5"
-    }
 
     #bloqueio = {"P1": False, "P5": False}
     fechando = {"P1": None, "P5": None}
@@ -75,8 +56,6 @@ def escutar_clp():
                 executando[rampa] = verificar_executando(api_urls[rampa])
 
             resposta = client.read_coils(address=ENDERECO_INICIAL, count=20, slave=UNIT_ID)
-            payload_em_espera["P1"] = payload_p1
-            payload_em_espera["P5"]  = payload_p5
             if not resposta.isError():
                 
                 estados = resposta.bits
@@ -96,7 +75,7 @@ def escutar_clp():
                         print(f"[CONTAGEM] Executando {rampa} = {executando[rampa]}")
                         print(f"[CLP] Deque Fechamento {rampa} : {deque_fechamento[rampa]}")
                         print(f"[CLP] Deque Abertura {rampa} : {deque_abertura[rampa]}")
-                        inicio_contagem[rampa], final_contagem[rampa], payload_em_espera[rampa] = botoes(api_urls[rampa], rampa, inicio_contagem[rampa], final_contagem[rampa], executando[rampa], payload_em_espera[rampa], deque_abertura[rampa], deque_fechamento[rampa])
+                        inicio_contagem[rampa], final_contagem[rampa] = botoes(rampa, inicio_contagem[rampa], final_contagem[rampa], executando[rampa], deque_abertura[rampa], deque_fechamento[rampa], liberar_contagem)
                         #print(f"A Deque_monit{rampa} logo após botoes é de: {deque_monit[rampa]}")
                         #inicio_contagem, payload_em_espera_p5= botoes(API_URL, "P5", inicio_contagem, executando, payload_em_espera_p5, deque_monit, deque_solto)
 

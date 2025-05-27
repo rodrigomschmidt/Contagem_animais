@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),"..")))
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import threading
-from clp_monitor import escutar_clp
+from clp_monitor import escutar_clp, get_liberar_contagem
 
 thread_clp = None
 
@@ -18,6 +18,12 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+
+@app.get("/estado_clp")
+def estado_clp():
+    estado = get_liberar_contagem()
+    return estado
+
 
 if __name__ == "__main__":
     import uvicorn
