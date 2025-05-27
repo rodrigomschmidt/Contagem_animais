@@ -1,6 +1,8 @@
 import requests
 import Levenshtein
 import time
+from datetime import datetime
+from utilitarios import registrar_resultado, copiar_para_rede
 
 def leitura_placas(dict_url, dict_placa):
     try:
@@ -102,3 +104,97 @@ def loop_placas(dict_url, dict_placa, dict_payload, tree_sem, popup):
 
 
             time.sleep(0.5)
+
+
+def loop_iniciar(url_clp, dict_payload, dict_url_contagem, config, dict_sequenciais,):
+    estado_anterior = {"P1": False, "P5": False}
+    
+    while True:
+        try:
+            resp = requests.get(f"{url_clp}/estado_clp", timeout=2)
+            if resp.ok:
+                estado = resp.json()
+
+                for rampa in dict_payload.keys():
+                    atual = estado.get(rampa, False)
+                    anterior = estado_anterior[rampa]
+                    payload = dict_payload[rampa]
+                    url = dict_url_contagem[rampa]
+
+                    if atual and not anterior:
+                        # Sinal subiu: iniciar contagem
+                        if all([payload["placa"], payload["ordem_entrada"], payload["data_abate"], payload["sequencial"]]):
+                            print(f"[INTERFACE] Disparando contagem para {rampa}: {payload}")
+                            try:
+                                r = requests.post(f"{url}/iniciar", json=payload, timeout=5)
+                                if r.ok:
+                                    print(f"[INTERFACE] Contagem iniciada com sucesso para {rampa}")
+                                else:
+                                    print(f"[INTERFACE] Erro ao iniciar contagem para {rampa}: {r.text}")
+                            except Exception as e:
+                                print(f"[INTERFACE] Falha ao iniciar contagem para {rampa}: {e}")
+                        else:
+                            print(f"[INTERFACE] Payload incompleto para {rampa}, contagem não iniciada.")
+
+                    elif not atual and anterior:
+                        # Sinal desceu: finalizar contagem
+                        print(f"[INTERFACE] Finalizando contagem de {rampa}")
+                        try:
+                            r = requests.post(f"{url}/parar", timeout=5)
+                            if r.ok:
+                                print(f"[INTERFACE] Contagem finalizada para {rampa}")
+                            else:
+                                print(f"[INTERFACE] Erro ao finalizar contagem para {rampa}: {r.text}")
+                        except Exception as e:
+                            print(f"[INTERFACE] Falha ao finalizar contagem para {rampa}: {e}")
+                            continue
+
+                        # Aguarda finalização real via /status
+                        try:
+                            print(f"[INTERFACE] Aguardando finalização segura da contagem de {rampa}...")
+                            while True:
+                                status = requests.get(f"{url}/status", timeout=2)
+                                if status.ok and not status.json().get("executando", True):
+                                    print(f"[INTERFACE] Confirmado: contagem finalizada para {rampa}")
+                                    break
+                                time.sleep(0.5)
+                        except Exception as e:
+                            print(f"[INTERFACE] Erro ao aguardar /status de {rampa}: {e}")
+                            continue
+
+                        # Coleta e salva o resultado
+                        try:
+                            r_resultado = requests.get(f"{url}/resultado", timeout=5)
+                            if r_resultado.ok:
+                                contagem = int(r_resultado.json().get("contagem", 0))
+                                hora = datetime.now().strftime("%H:%M:%S")
+                                data = datetime.now().strftime("%d/%m/%Y")
+
+                                registrar_resultado(
+                                    data=data,
+                                    placa=payload["placa"],
+                                    sequencial=payload["sequencial"],
+                                    quantidade=contagem,
+                                    caminho_excel=config["caminho_excel"],
+                                    hora=hora,
+                                    ordem_compra=payload["ordem_entrada"]
+                                )
+
+                                copiar_para_rede(config["caminho_excel"], config["caminho_excel_rede"])
+
+                                dict_sequenciais[rampa] = str(int(dict_sequenciais[rampa]) + 1)
+                                dict_payload[rampa]["sequencial"] = dict_sequenciais[rampa]
+
+                                print(f"[INTERFACE] Resultado registrado com sucesso para {rampa}")
+                            else:
+                                print(f"[INTERFACE] Erro ao obter resultado: {r_resultado.text}")
+                        except Exception as e:
+                            print(f"[INTERFACE] Erro ao consultar /resultado de {rampa}: {e}")
+
+                    # Atualiza o estado anterior da rampa
+                    estado_anterior[rampa] = atual
+
+        except Exception as e:
+            print(f"[INTERFACE] Erro geral no loop_iniciar: {e}")
+
+        time.sleep(1)

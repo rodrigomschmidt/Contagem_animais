@@ -7,7 +7,10 @@ caminho_output_rede= results\Videos\Rede
 buffer = 0
 caminho_excel=results\Excel\Local\RESULTADOS.xlsx
 caminho_excel_rede= results\Excel\Rede
-API_URL_P5 = http://10.1.2.23:8001
-API_URL_P1 = http://10.1.2.23:8000
+API_URL_P5 = http://10.1.2.23:8005
+API_URL_P1 = http://10.1.2.23:8001
+API_URL_PLACAS_P5 = http://10.1.2.23:8015
+API_URL_PLACAS_P1 = http://10.1.2.23:8011
+URL_CLP = http://10.1.2.23:8002
 monitor = 1
 
