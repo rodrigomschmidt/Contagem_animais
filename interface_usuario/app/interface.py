@@ -12,12 +12,6 @@ import Levenshtein
 
 config = load_config("config/config.txt")
 
-dict_url = {"P1": "http://10.1.2.23:8011", "P5": "http://10.1.3.93:8015"}
-
-dict_placa = {"P1": {"placa_lida": None, "placa_anterior": None, "estado": None, "estado_anterior": None, "ordem_var": None, "placa_var": None},
-              "P5": {"placa_lida": None, "placa_anterior": None, "estado": None, "estado_anterior": None, "ordem_var": None, "placa_var": None}}
-
-
 def aguardar_stream_pronto(api_url, tentativas=30, intervalo=1):
     for i in range(tentativas):
         try:
@@ -29,108 +23,14 @@ def aguardar_stream_pronto(api_url, tentativas=30, intervalo=1):
         time.sleep(intervalo)
     return False
 
-def leitura_placas(dict_url):
-    try:
-        for rampa in dict_url.keys():
-            resp_placa = requests.get(f"{dict_url[rampa]}/placa", timeout=2)
-            resp_estado = requests.get(f"{dict_url[rampa]}/estado", timeout=2)
 
-            #CHECAGEM PLACA
-            if resp_placa.ok:
-                dict_placa[rampa]["placa_lida"] = resp_placa.json()
-                print(f"PLACA {rampa} = {resp_placa.json()}")
-            else:
-                print(f"[ERRO] Código de resposta: {resp_placa.status_code}")
+def iniciar_interface(root, caminho_excel, dict_placa):
 
-            #CHECAGEM ESTADO
-            if resp_estado.ok:
-                dict_placa[rampa]["estado"] = resp_estado.json()
-                print(f"ESTADO {rampa} = {resp_estado.json()}")
-            else:
-                print(f"[ERRO] Código de resposta: {resp_estado.status_code}")
-    except Exception as e:
-        print(f"[ERRO] Falha ao consultar P1: {e}")
     
-    return
-
-def solicitar_input(caminho_excel, contagem, placa, ordem_entrada, novo_sequencial, data_abate, rampa):
-    resultados = {
-        "placa": placa,
-        "ordem": ordem_entrada,
-        "sequencial": novo_sequencial,
-        "data_abate": data_abate,
-        "rampa": rampa
-    }
-
-    root = tk.Tk()
-    root.withdraw()
     popup = tk.Toplevel(root)
     popup.title("Contador")
     popup.lift()
     popup.focus_force()
-
-    def loop():
-
-        
-        # enquanto a janela existir, roda o loop
-        while True:
-            for rampa in dict_placa.keys():
-                dict_placa[rampa]["estado_anterior"] = dict_placa[rampa]["estado"]
-                dict_placa[rampa]["placa_anterior"] = dict_placa[rampa]["placa_lida"]
-
-            leitura_placas(dict_url)
-
-            placa_atual = dict_placa[rampa]["placa_lida"]
-            for rampa in dict_placa.keys():
-                melhor_placa = None
-                melhor_ordem = None
-                if dict_placa[rampa]["estado_anterior"] == True:
-                    if dict_placa[rampa]["estado"] == False: #ou seja, trocou de estado, pois o anterior era True e o novo é falso - Caminhão saindo da rampa
-                        dict_placa[rampa]["placa_lida"] = None
-
-                if dict_placa[rampa]["placa_anterior"] != dict_placa[rampa]["placa_lida"]: #OU SEJA, SE HOUVE TROCA DE PLACA
-                    
-                    menor_d = None
-
-                    # Itera por todas as linhas (itens) da treeview
-                    for item_id in tree_sem.get_children():
-                        
-                        valores = tree_sem.item(item_id, "values")
-                        placa_ais = valores[1].replace("-", "").strip()
-                        ordem_ais = valores[2].replace("-", "").strip()
-
-                        if dict_placa[rampa]["placa_lida"] == None or placa_ais == None:
-
-                            print("[SIM] Um ou mais argumentos None")
-                            continue
-                        else:
-                            d = Levenshtein.distance(placa_ais, dict_placa[rampa]["placa_lida"]) 
-                            print(f"[SIM] Similaridade entre {placa_ais} e {placa_atual} é de {d}")
-
-                        if menor_d is None: # Se menor_d for None, primeira iteração - atribuir os valores atuais. 
-                            menor_d = d
-                            melhor_placa = placa_ais
-                            melhor_ordem = ordem_ais
-                            
-                        else: # menor_d existe, ou seja, não é a primeira iteração
-                            if d < menor_d:
-                                menor_d = d 
-                                if placa_ais == melhor_placa:
-                                    if int(ordem_ais) < int(melhor_ordem):
-
-                                        melhor_placa = placa_ais
-                                        melhor_ordem = ordem_ais
-                                else:
-                                    melhor_placa = placa_ais
-                                    melhor_ordem = ordem_ais
-                        
-                        #print(f"Placa = {placa_ais} - Ordem = {ordem_ais}")
-
-                if melhor_placa is not None:
-                    popup.after(0, lambda r=rampa, p=melhor_placa: dict_placa[r]["placa_var"].set(p))
-                    popup.after(0, lambda r=rampa, o=melhor_ordem: dict_placa[r]["ordem_var"].set(o))
-
-            time.sleep(1)
 
     # posicionamento no monitor
     largura, altura = 1080, 680
@@ -145,8 +45,6 @@ def solicitar_input(caminho_excel, contagem, placa, ordem_entrada, novo_sequenci
 
     hoje = datetime.now().strftime("%d/%m/%Y")
     amanha = (datetime.now() + timedelta(days=1)).strftime("%d/%m/%Y")
-    if data_abate is None:
-        data_abate = amanha
 
     def converter_data(data):
         try:
@@ -154,7 +52,6 @@ def solicitar_input(caminho_excel, contagem, placa, ordem_entrada, novo_sequenci
         except:
             return None
 
-    # ——————————
     # FRAME ESQUEDO - PLACAS/ORDENS
     frame_esquerda = tk.Frame(popup)
     frame_esquerda.pack(side=tk.LEFT, padx=10, pady=10)
@@ -187,7 +84,6 @@ def solicitar_input(caminho_excel, contagem, placa, ordem_entrada, novo_sequenci
     tk.Button(frame_botoes, text="Cancelar", command=lambda: cancelar(), bg="red", font=fonte, fg="white")\
         .pack(side=tk.RIGHT, expand=True, fill=tk.X, padx=(5,0))
 
-    
     # FRAME DIREITO - TABELAS
     frame_direita = tk.Frame(popup)
     frame_direita.pack(side=tk.RIGHT, padx=10, pady=10)
@@ -203,8 +99,6 @@ def solicitar_input(caminho_excel, contagem, placa, ordem_entrada, novo_sequenci
         tree_sem.heading(col, text=col.upper())
         tree_sem.column(col, width=100 if col=="Fornecedor" else 80)
     tree_sem.pack()
-
-    
 
     # TABELA 2 - PLACAS RECEBIDAS
     tk.Label(frame_direita, font=fonte, text="Placas com Retorno").pack(pady=5)
@@ -285,30 +179,13 @@ def solicitar_input(caminho_excel, contagem, placa, ordem_entrada, novo_sequenci
 
     atualizar_tabelas()
 
-    t = threading.Thread(target=loop, daemon=True)
-    t.start()
-    
-    
-
     # funções de confirmação e cancelamento (sem alterações)
     def confirmar():
         # implementar disparo com placas de P1/P5
         pass
 
     def cancelar():
-        resultados["placa"] = None
-        popup.destroy()
-        root.destroy()
 
-    root.mainloop()
-
-    if resultados["placa"] is None:
-        return None
-
-    return (
-        resultados["placa"],
-        resultados["ordem"],
-        resultados["sequencial"],
-        resultados["data_abate"],
-        resultados["rampa"]
-    )
+        pass
+    
+    return tree_sem, tree_com, popup

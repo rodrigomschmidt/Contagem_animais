@@ -1,7 +1,7 @@
 caminho_video_p5= rtsp://admin:czcz8910@192.168.42.48/Streaming/Channels/201?transport=tcp
-ip_p5 = 192.168.42.48
+ip_P5 = 192.168.42.48
 caminho_video_p1= rtsp://admin:czcz8910@192.168.42.49/Streaming/Channels/201?transport=tcp
-ip_p1 = 192.168.42.49
+ip_P1 = 192.168.42.49
 caminho_output_base= results\Videos\Local
 caminho_output_rede= results\Videos\Rede
 buffer = 0
