@@ -14,7 +14,6 @@ def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial
     resultados = None
     global parar_event
     parar_event.clear()
-    modelo.predictor.tracker = None
 
     config = load_config("config/config_contagem.txt")
 

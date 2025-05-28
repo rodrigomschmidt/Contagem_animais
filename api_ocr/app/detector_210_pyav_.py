@@ -91,13 +91,13 @@ def leitura_placas(ip_camera, LINHA_P1, LINHA_P2):
         while True:
             try:
                 for frame_av in container.decode(stream):
-                    time.sleep(0.07)
+                    time.sleep(0.1)
                     frame = frame_av.to_ndarray(format="bgr24")
 
                     del frame_av
                     gc.collect()
 
-                    frame = cv2.resize(frame, (640,384))
+                    #frame = cv2.resize(frame, (640,384))
                     frame_counter += 1
 
                     try:
@@ -114,6 +114,9 @@ def leitura_placas(ip_camera, LINHA_P1, LINHA_P2):
                     for box, conf in zip(boxes, confidences):
                         x1, y1, x2, y2 = box
                         crop = frame[y1:y2, x1:x2]
+
+                        del frame
+                        gc.collect()
 
                         if crop.size == 0:
                             continue
