@@ -14,6 +14,7 @@ def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial
     resultados = None
     global parar_event
     parar_event.clear()
+    modelo.predictor.tracker = None
 
     config = load_config("config/config_contagem.txt")
 
@@ -43,6 +44,9 @@ def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial
     if frame is None or frame.size == 0:
         print("[CONTADOR] Não foi possível obter um frame válido. Abortando contagem.")
         return None
+
+    del frame
+    gc.collect()
 
     print("[CONTADOR] Primeiro frame válido recebido. Iniciando inferência.")
 
@@ -89,31 +93,32 @@ def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial
                 parar_pendente = True
                 parar_event.clear()
 
-            frame_atrasado = get_frame_func()
+            frame = get_frame_func()
 
-            if frame_atrasado is None or frame_atrasado.size == 0:
+            if frame is None or frame.size == 0:
                 print("[CONTADOR] Frame inválido recebido. Pulando frame.")
                 continue
 
-            frame_atrasado = crop_para_5x4(frame_atrasado, crop_configs[rampa])
+            frame = crop_para_5x4(frame, crop_configs[rampa])
+            frame = cv2.resize(frame, (640,512))
 
             if video_writer is None and video_writer2 is None:
-                h_final, w_final = frame_atrasado.shape[:2]
+                h_final, w_final = frame.shape[:2]
                 video_writer = cv2.VideoWriter(nome_video, cv2.VideoWriter_fourcc(*"mp4v"), 10, (w_final, h_final))
-                video_writer2 = cv2.VideoWriter(nome_video2, cv2.VideoWriter_fourcc(*"mp4v"), 10, (480, 384))
+                video_writer2 = cv2.VideoWriter(nome_video2, cv2.VideoWriter_fourcc(*"mp4v"), 10, (w_final, h_final))
 
             frame_count += 1
-            video_writer.write(frame_atrasado)
+            video_writer.write(frame)
 
             with torch.no_grad():
                 resultados = modelo.track(
                     half=True,
-                    source=frame_atrasado,
+                    source=frame,
                     conf=0.7,
                     iou=0.7,
                     tracker="config/trackers/bytetrack.yaml",
                     persist=True,
-                    imgsz=512
+                    imgsz=640
                 )
 
             objetos_presentes = resultados[0].boxes is not None and len(resultados[0].boxes) > 0
@@ -150,27 +155,25 @@ def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial
                             in_count += 1
                             object_crossing[obj_id] = "linha_1"
 
-                        cv2.circle(frame_atrasado, (centro_x, centro_y), radius=5, color=(255, 0, 0))
+                        cv2.circle(frame, (centro_x, centro_y), radius=5, color=(255, 0, 0))
 
-                    cv2.rectangle(frame_atrasado, (x1, y1), (x2, y2), (255, 0, 0), 2)
-                    cv2.putText(frame_atrasado, f"ID: {obj_id} {obj_conf}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
+                    cv2.putText(frame, f"ID: {obj_id} {obj_conf}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
-            cv2.line(frame_atrasado, (LINE_1, 0), (LINE_1, frame_atrasado.shape[0]), (0, 255, 0), 2)
-            cv2.line(frame_atrasado, (LINE_2, 0), (LINE_2, frame_atrasado.shape[0]), (0, 0, 255), 2)
-            cv2.putText(frame_atrasado, f"Entradas: {in_count}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
-            cv2.putText(frame_atrasado, f"Saidas: {out_count}", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
-            cv2.putText(frame_atrasado, f"Contagem: {in_count - out_count}", (50, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+            cv2.line(frame, (LINE_1, 0), (LINE_1, frame.shape[0]), (0, 255, 0), 2)
+            cv2.line(frame, (LINE_2, 0), (LINE_2, frame.shape[0]), (0, 0, 255), 2)
+            cv2.putText(frame, f"Entradas: {in_count}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+            cv2.putText(frame, f"Saidas: {out_count}", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+            cv2.putText(frame, f"Contagem: {in_count - out_count}", (50, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
 
-            frame_reduzido = cv2.resize(frame_atrasado, (480,384))
-            video_writer2.write(frame_reduzido)
+            video_writer2.write(frame)
 
             if set_frame_callback:
-                set_frame_callback(frame_atrasado)
+                set_frame_callback(frame)
 
             # Liberação de memória após uso dos resultados
-            del resultados
+            del resultados, frame
             gc.collect()
-            
             
             if frame_count % FRAME_CHECK_INTERVAL == 0:
                 torch.cuda.empty_cache()
@@ -180,7 +183,9 @@ def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial
             video_writer.release()
         if video_writer2:
             video_writer2.release()
-        del resultados
+        if 'resultados' in locals():
+            del resultados
+        del object_crossing
         gc.collect()
         torch.cuda.empty_cache()
         torch.cuda.synchronize()
