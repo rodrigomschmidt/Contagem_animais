@@ -68,16 +68,13 @@ def escutar_clp():
                     print(f"[CLP] Abrindo: P1={abrindo['P1']}, P5={abrindo['P5']}")
                     print(f"[CLP] Fechando: P1={fechando['P1']}, P5={fechando['P5']}")
 
-
                     for rampa in api_urls.keys():
                         deque_abertura[rampa].append(abrindo[rampa])
                         deque_fechamento[rampa].append(fechando[rampa])
                         print(f"[CONTAGEM] Executando {rampa} = {executando[rampa]}")
                         print(f"[CLP] Deque Fechamento {rampa} : {deque_fechamento[rampa]}")
                         print(f"[CLP] Deque Abertura {rampa} : {deque_abertura[rampa]}")
-                        inicio_contagem[rampa], final_contagem[rampa] = botoes(rampa, inicio_contagem[rampa], final_contagem[rampa], executando[rampa], deque_abertura[rampa], deque_fechamento[rampa], liberar_contagem)
-                        #print(f"A Deque_monit{rampa} logo após botoes é de: {deque_monit[rampa]}")
-                        #inicio_contagem, payload_em_espera_p5= botoes(API_URL, "P5", inicio_contagem, executando, payload_em_espera_p5, deque_monit, deque_solto)
+                        inicio_contagem, final_contagem = botoes(rampa, inicio_contagem, final_contagem, executando, deque_abertura, deque_fechamento, liberar_contagem)
 
                 else:
                     print("[CLP] Resposta de botões incompleta.")
