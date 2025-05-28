@@ -86,11 +86,18 @@ def leitura_placas(ip_camera, LINHA_P1, LINHA_P2):
         stream = container.streams.video[0]
         stream.thread_type = "AUTO"
 
+        clahe = cv2.createCLAHE(clipLimit=5.0, tileGridSize=(3, 3))
+
         while True:
             try:
                 for frame_av in container.decode(stream):
-                    time.sleep(0.05)
+                    time.sleep(0.07)
                     frame = frame_av.to_ndarray(format="bgr24")
+
+                    del frame_av
+                    gc.collect()
+
+                    frame = cv2.resize(frame, (640,384))
                     frame_counter += 1
 
                     try:
@@ -136,13 +143,12 @@ def leitura_placas(ip_camera, LINHA_P1, LINHA_P2):
                             print("[YOLO] Detecção FORA da ROI")
                             continue
 
-                        crop_cinza = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
-                        clahe = cv2.createCLAHE(clipLimit=5.0, tileGridSize=(3, 3))
-                        crop_bilateral = cv2.bilateralFilter(crop_cinza, d=7, sigmaColor=75, sigmaSpace=75)
-                        crop_clahe = clahe.apply(crop_bilateral)
+                        crop = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+                        crop = cv2.bilateralFilter(crop, d=7, sigmaColor=75, sigmaSpace=75)
+                        crop = clahe.apply(crop)
 
                         try:
-                            resultado = ocr.ocr(crop_clahe, det=True, rec=True)
+                            resultado = ocr.ocr(crop, det=True, rec=True)
                         except Exception as e:
                             print(f"[OCR] Erro: {e}")
                             continue
@@ -152,13 +158,13 @@ def leitura_placas(ip_camera, LINHA_P1, LINHA_P2):
                             continue
 
                         maior_area = 0
+                        area_crop = crop.shape[0] * crop.shape[1]
 
                         for det in resultado[0]:
                             texto_raw = det[1][0]
                             conf = det[1][1]
                             texto_limpo = limpar_placa_ocr(texto_raw)
                             area_det = area_quadrilatero(det[0])
-                            area_crop = crop.shape[0] * crop.shape[1]
 
                             if area_det < 0.15 * area_crop:
                                 print(f"[OCR] Ignorado por área pequena: {area_det:.2f} < 15% de {area_crop:.2f}") 
@@ -175,8 +181,13 @@ def leitura_placas(ip_camera, LINHA_P1, LINHA_P2):
                                     melhor_conf = conf
                                     print(f"[PLACA] {melhor_placa} (conf: {melhor_conf:.2f})")
 
-                    del results
+                    del results, boxes, confidences
+                    if 'resultado' in locals():
+                        del resultado
+                    if 'crop' in locals():
+                        del crop
                     gc.collect()
+
                     if frame_counter % FRAME_CHECK_INTERVAL == 0:
                         torch.cuda.empty_cache()
 

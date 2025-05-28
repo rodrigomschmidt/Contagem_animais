@@ -34,8 +34,8 @@ def load_config(config_file):
 async def lifespan(app: FastAPI):
     ip_camera = "rtsp://admin:czcz8910@192.168.42.55/Streaming/Channels/101?transport=tcp" #p1
     #ip_camera = r"C:\Users\rodrigo.schmidt\Documents\Python\Detect_placas\Videos_dataset\ok\ok2\video_1.mp4"
-    LINHA_P1 = (750, 1080)
-    LINHA_P2 = (1100, 0)
+    LINHA_P1 = (500, 720)
+    LINHA_P2 = (733, 0)
     thread = Thread(target= leitura_placas, args=(ip_camera, LINHA_P1, LINHA_P2), daemon = True)
     thread.start()
     yield
