@@ -44,8 +44,8 @@ def loop_placas(dict_url, dict_placa, dict_payload, tree_sem, popup):
                 melhor_ordem = None
                 if dict_placa[rampa]["estado_anterior"] == True:
                     if dict_placa[rampa]["estado"] == False: #ou seja, trocou de estado, pois o anterior era True e o novo é falso - Caminhão saindo da rampa
-                        popup.after(0, lambda r=rampa, p=melhor_placa: dict_placa[r]["placa_var"].set(""))
-                        popup.after(0, lambda r=rampa, o=melhor_ordem: dict_placa[r]["ordem_var"].set(""))
+                        popup.after(0, lambda r=rampa: dict_placa[r]["placa_var"].set(""))
+                        popup.after(0, lambda r=rampa: dict_placa[r]["ordem_var"].set(""))
 
                         dict_placa[rampa]["placa_lida"] = None
 
@@ -108,7 +108,7 @@ def loop_placas(dict_url, dict_placa, dict_payload, tree_sem, popup):
 
 def loop_iniciar(url_clp, dict_payload, dict_url_contagem, config, dict_sequenciais):
     estado_anterior = {"P1": False, "P5": False}
-    print("[DEBUG] O LOOP INICIAR ESTÁ ATIVO")
+    
     while True:
         try:
             resp = requests.get(f"{url_clp}/estado_clp", timeout=2)
@@ -117,7 +117,6 @@ def loop_iniciar(url_clp, dict_payload, dict_url_contagem, config, dict_sequenci
                 print(f"[DEBUG] O estado é = {estado}")
 
                 for rampa in dict_payload.keys():
-                    print("[DEBUG] ESTAMOS DENTRO DO FOR")
                     atual = estado.get(rampa, False)
                     anterior = estado_anterior[rampa]
                     payload = dict_payload[rampa]
