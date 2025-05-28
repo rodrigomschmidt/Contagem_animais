@@ -100,7 +100,7 @@ def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial
             if video_writer is None and video_writer2 is None:
                 h_final, w_final = frame_atrasado.shape[:2]
                 video_writer = cv2.VideoWriter(nome_video, cv2.VideoWriter_fourcc(*"mp4v"), 10, (w_final, h_final))
-                video_writer2 = cv2.VideoWriter(nome_video2, cv2.VideoWriter_fourcc(*"mp4v"), 10, (w_final, h_final))
+                video_writer2 = cv2.VideoWriter(nome_video2, cv2.VideoWriter_fourcc(*"mp4v"), 10, (480, 384))
 
             frame_count += 1
             video_writer.write(frame_atrasado)
@@ -161,7 +161,8 @@ def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial
             cv2.putText(frame_atrasado, f"Saidas: {out_count}", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
             cv2.putText(frame_atrasado, f"Contagem: {in_count - out_count}", (50, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
 
-            video_writer2.write(frame_atrasado)
+            frame_reduzido = cv2.resize(frame_atrasado, (480,384))
+            video_writer2.write(frame_reduzido)
 
             if set_frame_callback:
                 set_frame_callback(frame_atrasado)
@@ -169,6 +170,7 @@ def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial
             # Liberação de memória após uso dos resultados
             del resultados
             gc.collect()
+            
             
             if frame_count % FRAME_CHECK_INTERVAL == 0:
                 torch.cuda.empty_cache()
