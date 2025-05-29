@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),"..")))
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from threading import Thread
-from detector_210_pyav_ import leitura_placas, get_placa_atual, get_estado_atual
+from detector_210_pyav import leitura_placas, get_placa_atual, get_estado_atual
 
 def load_config(config_file):
 
