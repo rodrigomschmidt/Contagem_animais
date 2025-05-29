@@ -8,7 +8,7 @@ from routes_threads import router
 from video_stream_threads import iniciar_leitura_continua, parar_leitura, get_frame_atual
 from utilitarios import load_config
 from modelo import carregar_modelo
-from state_threads import EstadoContador, yolo_lock  # Importa yolo_lock de state
+from state_threads import EstadoContador, yolo_lock, camera_states  # Importa yolo_lock de state
 import gc
 import torch
 
@@ -28,9 +28,6 @@ CAMERAS = [
         "url_key": "url_p5",
     },
 ]
-
-# Dicionário para armazenar estados por câmera
-camera_states = {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

@@ -5,14 +5,14 @@ import torch
 import time
 import gc
 from utilitarios import trigger_manual_correction, copiar_para_rede, load_config, crop_para_5x4
-from state_threads import EstadoContador, yolo_lock  # Importa yolo_lock de state
+from state_threads import camera_states, yolo_lock  # Importa yolo_lock de state
 
 def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial,
              ordem_entrada, data_abate, ip, rampa, get_frame_func=None, set_frame_callback=None, camera_id=None):
     gc.collect()
     torch.cuda.empty_cache()
     resultados = None
-    state = EstadoContador[camera_id]
+    state = camera_states[camera_id]
     state.parar_event.clear()
 
     config = load_config("config/config_contagem.txt")

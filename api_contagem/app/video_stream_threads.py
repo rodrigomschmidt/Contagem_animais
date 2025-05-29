@@ -69,4 +69,5 @@ def _ler_video(url, camera_id):
 
 def get_frame_atual(camera_id):
     with lock_frames:
-        return frames_atuais.get(camera_id)
+        frame = frames_atuais.get(camera_id)
+        return frame.copy() if frame is not None else None

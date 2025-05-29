@@ -19,3 +19,6 @@ class EstadoContador:
 
 # Lock compartilhado para acesso ao modelo YOLO
 yolo_lock = Lock()
+
+# Dicionário para armazenar estados por câmera
+camera_states = {}
