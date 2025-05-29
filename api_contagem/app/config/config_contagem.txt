@@ -2,7 +2,7 @@ url_p1 = rtsp://admin:czcz8910@192.168.42.49/Streaming/Channels/201?transport=tc
 url_p5= rtsp://admin:czcz8910@192.168.42.48/Streaming/Channels/201?transport=tcp
 API_URL_P1= http://10.1.2.23:8000
 API_URL_P5= http://10.1.2.23:8001
-caminho_modelo= models/best_L2.pt
+caminho_modelo= models/best_cn_L.pt
 buffer = 0
 atraso_segundos = 5
 fps = 10

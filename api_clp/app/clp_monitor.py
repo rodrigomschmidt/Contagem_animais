@@ -7,7 +7,7 @@ import requests
 
 monitorando_clp = True
 config = load_config("config_clp.txt")
-api_urls = {"P1": config["API_URL_P1"], "P5": config["API_URL_P5"]}
+url_contagem = config["API_URL_CONTAGEM"]
 executando = {}
 liberar_contagem = {"P1": False, "P5": False}
 
@@ -15,9 +15,9 @@ def get_liberar_contagem():
     global liberar_contagem
     return liberar_contagem
 
-def verificar_executando(url):
+def verificar_executando(url, rampa):
     try:
-        resp = requests.get((f"{url}/status"), timeout=2)
+        resp = requests.get((f"{url}/status/{rampa}"), timeout=2)
         if resp.status_code == 200:
             return resp.json().get("executando", False)
     except Exception as e:
@@ -52,8 +52,8 @@ def escutar_clp():
 
     try:
         while monitorando_clp:
-            for rampa in api_urls.keys():
-                executando[rampa] = verificar_executando(api_urls[rampa])
+            for rampa in liberar_contagem.keys():
+                executando[rampa] = verificar_executando(url_contagem, rampa)
 
             resposta = client.read_coils(address=ENDERECO_INICIAL, count=20, slave=UNIT_ID)
             if not resposta.isError():
@@ -68,7 +68,7 @@ def escutar_clp():
                     print(f"[CLP] Abrindo: P1={abrindo['P1']}, P5={abrindo['P5']}")
                     print(f"[CLP] Fechando: P1={fechando['P1']}, P5={fechando['P5']}")
 
-                    for rampa in api_urls.keys():
+                    for rampa in liberar_contagem.keys():
                         deque_abertura[rampa].append(abrindo[rampa])
                         deque_fechamento[rampa].append(fechando[rampa])
                         print(f"[CONTAGEM] Executando {rampa} = {executando[rampa]}")

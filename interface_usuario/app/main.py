@@ -12,8 +12,6 @@ config = load_config("config/config.txt")
 
 url_placas = None
 
-dict_url_contagem = {"P1": None, "P5": None}
-
 dict_placa = {"P1": {"placa_lida": None, "placa_anterior": None, "estado": None, "estado_anterior": None, "ordem_var": None, "placa_var": None},
               "P5": {"placa_lida": None, "placa_anterior": None, "estado": None, "estado_anterior": None, "ordem_var": None, "placa_var": None}}
 
@@ -61,29 +59,26 @@ def main():
     root.withdraw()
 
     url_placas = config[f"API_URL_PLACAS"]
+    url_contagem = config[f"API_URL_CONTAGEM"]
 
     # Preenche ip e rampa nos payloads
     for rampa in dict_placa.keys():
         dict_payload[rampa]["ip"] = config[f"ip_{rampa}"]
         dict_payload[rampa]["rampa"] = rampa
-        dict_url_contagem[rampa] = config[f"API_URL_{rampa}"]
-        
+
 
     tree_sem, tree_com, popup = iniciar_interface(root, caminho_excel, dict_placa)
     
     t1 = threading.Thread(target=loop_placas, args=(url_placas, dict_placa, dict_payload, tree_sem, popup,), daemon=True)
     t1.start()
 
-    t2 = threading.Thread(target=loop_iniciar, args=(url_clp, dict_payload, dict_url_contagem, config, dict_sequenciais,), daemon=True)
+    t2 = threading.Thread(target=loop_iniciar, args=(url_clp, dict_payload, url_contagem, config, dict_sequenciais,), daemon=True)
     t2.start()
     #registrar_resultado(data_abate, placa, sequencial, contagem, caminho_excel, hora, ordem)
     #copiar_para_rede(caminho_excel, caminho_excel_rede)
 
     root.mainloop()
     #sequencial = str(int(sequencial) + 1)
-        
-    
-    
 
 if __name__ == "__main__":
     main()

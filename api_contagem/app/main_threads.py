@@ -3,14 +3,11 @@ import sys
 from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 from threading import Thread
-import cv2
 from routes_threads import router
 from video_stream_threads import iniciar_leitura_continua, parar_leitura, get_frame_atual
 from utilitarios import load_config
 from modelo import carregar_modelo
 from state_threads import EstadoContador, yolo_lock, camera_states  # Importa yolo_lock de state
-import gc
-import torch
 
 # Configurações do ambiente
 os.add_dll_directory(r"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin")

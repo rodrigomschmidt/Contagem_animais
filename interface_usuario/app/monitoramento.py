@@ -110,7 +110,7 @@ def loop_placas(url_placas, dict_placa, dict_payload, tree_sem, popup):
             time.sleep(0.5)
 
 
-def loop_iniciar(url_clp, dict_payload, dict_url_contagem, config, dict_sequenciais):
+def loop_iniciar(url_clp, dict_payload, url, config, dict_sequenciais):
     estado_anterior = {"P1": False, "P5": False}
     
     while True:
@@ -124,14 +124,13 @@ def loop_iniciar(url_clp, dict_payload, dict_url_contagem, config, dict_sequenci
                     atual = estado.get(rampa, False)
                     anterior = estado_anterior[rampa]
                     payload = dict_payload[rampa]
-                    url = dict_url_contagem[rampa]
-
+                    
                     if atual and not anterior:
                         # Sinal subiu: iniciar contagem
                         if all([payload["placa"], payload["ordem_entrada"], payload["data_abate"], payload["sequencial"]]):
                             print(f"[INTERFACE] Disparando contagem para {rampa}: {payload}")
                             try:
-                                r = requests.post(f"{url}/iniciar", json=payload, timeout=5)
+                                r = requests.post(f"{url}/iniciar/{rampa}", json=payload, timeout=5)
                                 if r.ok:
                                     print(f"[INTERFACE] Contagem iniciada com sucesso para {rampa}")
                                 else:
@@ -145,7 +144,7 @@ def loop_iniciar(url_clp, dict_payload, dict_url_contagem, config, dict_sequenci
                         # Sinal desceu: finalizar contagem
                         print(f"[INTERFACE] Finalizando contagem de {rampa}")
                         try:
-                            r = requests.post(f"{url}/parar", timeout=5)
+                            r = requests.post(f"{url}/parar/{rampa}", timeout=5)
                             if r.ok:
                                 print(f"[INTERFACE] Contagem finalizada para {rampa}")
                             else:
@@ -158,7 +157,7 @@ def loop_iniciar(url_clp, dict_payload, dict_url_contagem, config, dict_sequenci
                         try:
                             print(f"[INTERFACE] Aguardando finalização segura da contagem de {rampa}...")
                             while True:
-                                status = requests.get(f"{url}/status", timeout=2)
+                                status = requests.get(f"{url}/status/{rampa}", timeout=2)
                                 if status.ok and not status.json().get("executando", True):
                                     print(f"[INTERFACE] Confirmado: contagem finalizada para {rampa}")
                                     break
@@ -169,7 +168,7 @@ def loop_iniciar(url_clp, dict_payload, dict_url_contagem, config, dict_sequenci
 
                         # Coleta e salva o resultado
                         try:
-                            r_resultado = requests.get(f"{url}/resultado", timeout=5)
+                            r_resultado = requests.get(f"{url}/resultado/{rampa}", timeout=5)
                             if r_resultado.ok:
                                 contagem = int(r_resultado.json().get("contagem", 0))
                                 hora = datetime.now().strftime("%H:%M:%S")

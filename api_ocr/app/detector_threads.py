@@ -141,6 +141,11 @@ def leitura_placas(rtsp_url, linha_p1, linha_p2, camera_id, model):
 
                             state.ultimo_lado = lado_atual
 
+                            if state.ultimo_lado is None and lado_atual == 1:
+                                state.presenca = True
+                                state.melhor_placa = None
+                                state.melhor_conf = 0
+
                             if lado_atual != 1:
                                 print(f"[YOLO] Detecção FORA da ROI (câmera {camera_id})")
                                 continue
