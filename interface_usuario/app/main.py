@@ -10,8 +10,7 @@ from monitoramento import loop_placas, loop_iniciar
 
 config = load_config("config/config.txt")
 
-dict_url_placas = {"P1": None, 
-            "P5": None}
+url_placas = None
 
 dict_url_contagem = {"P1": None, "P5": None}
 
@@ -61,16 +60,18 @@ def main():
     root = tk.Tk()
     root.withdraw()
 
+    url_placas = config[f"API_URL_PLACAS"]
+
     # Preenche ip e rampa nos payloads
     for rampa in dict_placa.keys():
         dict_payload[rampa]["ip"] = config[f"ip_{rampa}"]
         dict_payload[rampa]["rampa"] = rampa
         dict_url_contagem[rampa] = config[f"API_URL_{rampa}"]
-        dict_url_placas[rampa] = config[f"API_URL_PLACAS_{rampa}"]
+        
 
     tree_sem, tree_com, popup = iniciar_interface(root, caminho_excel, dict_placa)
     
-    t1 = threading.Thread(target=loop_placas, args=(dict_url_placas, dict_placa, dict_payload, tree_sem, popup,), daemon=True)
+    t1 = threading.Thread(target=loop_placas, args=(url_placas, dict_placa, dict_payload, tree_sem, popup,), daemon=True)
     t1.start()
 
     t2 = threading.Thread(target=loop_iniciar, args=(url_clp, dict_payload, dict_url_contagem, config, dict_sequenciais,), daemon=True)

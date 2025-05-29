@@ -9,8 +9,7 @@ caminho_excel=results\Excel\Local\RESULTADOS.xlsx
 caminho_excel_rede= results\Excel\Rede
 API_URL_P5 = http://10.1.3.93:8005
 API_URL_P1 = http://10.1.3.93:8001
-API_URL_PLACAS_P5 = http://10.1.2.23:8015
-API_URL_PLACAS_P1 = http://10.1.2.23:8011
+API_URL_PLACAS = http://10.1.2.23:8010
 URL_CLP = http://10.1.2.23:8002
 monitor = 1
 

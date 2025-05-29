@@ -4,23 +4,27 @@ import time
 from datetime import datetime
 from utilitarios import registrar_resultado, copiar_para_rede
 
-def leitura_placas(dict_url, dict_placa):
+def leitura_placas(url_placas, dict_placa):
     try:
-        for rampa in dict_url.keys():
-            resp_placa = requests.get(f"{dict_url[rampa]}/placa", timeout=2)
-            resp_estado = requests.get(f"{dict_url[rampa]}/estado", timeout=2)
+        for rampa in dict_placa.keys():
+            resp_placa = requests.get(f"{url_placas}/placa/{rampa}", timeout=2)
+            resp_estado = requests.get(f"{url_placas}/estado/{rampa}", timeout=2)
 
             #CHECAGEM PLACA
             if resp_placa.ok:
-                dict_placa[rampa]["placa_lida"] = resp_placa.json()
-                print(f"PLACA {rampa} = {resp_placa.json()}")
+                resposta = resp_placa.json()
+                dict_placa[rampa]["placa_lida"] = resposta["placa"]
+                placa = dict_placa[rampa]["placa_lida"]
+                print(f"PLACA {rampa} = {placa}")
             else:
                 print(f"[ERRO] Código de resposta: {resp_placa.status_code}")
 
             #CHECAGEM ESTADO
             if resp_estado.ok:
-                dict_placa[rampa]["estado"] = resp_estado.json()
-                print(f"ESTADO {rampa} = {resp_estado.json()}")
+                resposta = resp_estado.json()
+                dict_placa[rampa]["estado"] = resposta["estado"]
+                estado = dict_placa[rampa]["estado"]
+                print(f"ESTADO {rampa} = {estado}")
             else:
                 print(f"[ERRO] Código de resposta: {resp_estado.status_code}")
     except Exception as e:
@@ -28,7 +32,7 @@ def leitura_placas(dict_url, dict_placa):
     
     return
 
-def loop_placas(dict_url, dict_placa, dict_payload, tree_sem, popup):
+def loop_placas(url_placas, dict_placa, dict_payload, tree_sem, popup):
 
         # enquanto a janela existir, roda o loop
         while True:
@@ -36,7 +40,7 @@ def loop_placas(dict_url, dict_placa, dict_payload, tree_sem, popup):
                 dict_placa[rampa]["estado_anterior"] = dict_placa[rampa]["estado"]
                 dict_placa[rampa]["placa_anterior"] = dict_placa[rampa]["placa_lida"]
 
-            leitura_placas(dict_url, dict_placa)
+            leitura_placas(url_placas, dict_placa)
 
             placa_atual = dict_placa[rampa]["placa_lida"]
             for rampa in dict_placa.keys():
