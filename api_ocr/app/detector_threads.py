@@ -196,6 +196,7 @@ def leitura_placas(rtsp_url, linha_p1, linha_p2, camera_id, model):
 
         except Exception as e:
             print(f"[RECONEXÃO] Erro crítico no stream (câmera {camera_id}): {e}. Reiniciando...")
+        finally:
             try:
                 if 'container' in locals() and container:
                     container.close()
