@@ -37,10 +37,11 @@ def _ler_video(url, camera_id):
                 url,
                 timeout=5,
                 options={
-                    "fflags": "nobuffer",
+                    "fflags": "nobuffer+discardcorrupt",
                     "flags": "low_delay",
                     "rtsp_transport": "tcp",
-                    "max_delay": "500000"
+                    "max_delay": "500000",
+                    "stimeout": "5000000" 
                 }
             )
             stream = container.streams.video[0]
@@ -49,10 +50,21 @@ def _ler_video(url, camera_id):
             for packet in container.demux(stream):
                 if not stream_ativos.get(camera_id, False):
                     break
-                for frame in packet.decode():
-                    with lock_frames:
-                        frames_atuais[camera_id] = frame.to_ndarray(format="bgr24")
-                    break
+                try:
+                    for frame in packet.decode():
+                        img = frame.to_ndarray(format="bgr24")
+
+                        # Protege contra frames inválidos
+                        if img is None or img.size == 0:
+                            print(f"[STREAM] Frame inválido ignorado ({camera_id})")
+                            continue
+
+                        with lock_frames:
+                            frames_atuais[camera_id] = img
+                        break  # Pegamos um frame válido e saímos
+                except Exception as e:
+                    print(f"[STREAM] Erro de decodificação em {camera_id}: {e}")
+                    continue
 
         except Exception as e:
             print(f"[STREAM] Erro inesperado para {camera_id}: {e}")

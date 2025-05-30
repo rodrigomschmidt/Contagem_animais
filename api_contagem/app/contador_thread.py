@@ -85,7 +85,7 @@ def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial
 
     try:
         while True:
-            time.sleep(0.09)
+            #time.sleep(0.1)
 
             if state.parar_event.is_set():
                 print(f"[CONTADOR] Sinal de parada recebido para {camera_id}. Aguardando objetos saírem...")
@@ -114,8 +114,8 @@ def contador(modelo, caminho_output_base, caminho_output_rede, placa, sequencial
                     resultados = modelo.track(
                         half=True,
                         source=frame,
-                        conf=0.7,
-                        iou=0.7,
+                        conf=0.6,
+                        iou=0.5,
                         tracker="config/trackers/bytetrack.yaml",
                         persist=True,
                         imgsz=640
