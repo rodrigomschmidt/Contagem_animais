@@ -144,10 +144,12 @@ def consultar_resultados_excel(caminho_excel, placa, ordem):
         for row in ws.iter_rows(min_row=2, values_only=True):
             if len(row) >= 7:  # Data, Hora, Placa, Ordem, Sequencial, Quantidade, Caminho
                 row_data, row_hora, row_placa, row_ordem, row_sequencial, row_quantidade, row_caminho = row[:7]
-                if row_placa == placa and row_ordem == ordem:
+                if row_placa == placa.replace("-", "").strip() and row_ordem == ordem.replace("-", "").strip():
                     resultados.append((row_hora, row_placa, row_ordem, row_sequencial, row_quantidade, row_caminho))
+            else:
+                print(f"LINHA {row}NÃO ENTROU NO IF")
         wb.close()
-        
+        print(f"RESULTADOS = {resultados}")
         return resultados
     except FileNotFoundError:
         print(f"Arquivo {caminho_excel} não encontrado. Nenhum resultado retornado.")
