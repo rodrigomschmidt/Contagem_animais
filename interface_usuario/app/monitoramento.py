@@ -107,7 +107,7 @@ def loop_placas(url_placas, dict_placa, dict_payload, tree_sem, popup):
                     dict_payload[rampa]["data_abate"] = data_abate
 
 
-            time.sleep(0.5)
+            time.sleep(1.5)
 
 
 def loop_iniciar(url_clp, dict_payload, url, config, dict_sequenciais):
@@ -201,4 +201,4 @@ def loop_iniciar(url_clp, dict_payload, url, config, dict_sequenciais):
         except Exception as e:
             print(f"[INTERFACE] Erro geral no loop_iniciar: {e}")
 
-        time.sleep(1)
+        time.sleep(1.5)
