@@ -2,6 +2,7 @@ import os
 import requests
 from requests.auth import HTTPDigestAuth
 import shutil
+from datetime import datetime
 
 def trigger_manual_correction(ip):
 
@@ -45,19 +46,7 @@ def copiar_para_rede(caminho_local, caminho_rede):
 
 
 def load_config(config_file):
-    """
-    Carrega os pares chave=valor de um arquivo de configuração.
 
-    Args:
-        config_file (str): Caminho do arquivo.
-
-    Returns:
-        dict: Dicionário com as chaves e valores do arquivo.
-
-    Raises:
-        FileNotFoundError: Se o arquivo não for encontrado.
-        Exception: Para outros erros de leitura.
-    """
     config = {}
     try:
         with open(config_file, 'r') as f:
@@ -93,3 +82,11 @@ def crop_para_5x4(frame, crop_config):
     fim_x = inicio_x + nova_largura
 
     return frame_cortado[:, inicio_x:fim_x]
+
+def converter_data(data):
+        try:
+            data_obj = datetime.strptime(data, "%d/%m/%Y")
+            return data_obj.strftime("%d.%m.%Y")
+        except ValueError as e:
+            print(f"Erro ao converter a data: {e}")
+            return None

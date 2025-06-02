@@ -22,7 +22,6 @@ dict_payload = { "P1": {
     "sequencial": None,
     "ordem_entrada": None,
     "data_abate": None,
-    "ip": None,  # ou config["ip_p5"] dependendo do botão
     "rampa": "P1"  # ou "P5"
     },
     "P5": {
@@ -32,7 +31,6 @@ dict_payload = { "P1": {
     "sequencial": None,
     "ordem_entrada": None,
     "data_abate": None,
-    "ip": None,  # ou config["ip_p5"] dependendo do botão
     "rampa": "P5"  # ou "P5"
     },
 }

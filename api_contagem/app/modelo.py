@@ -1,7 +1,6 @@
 import torch
 import gc
 from ultralytics import YOLO
-from state_threads import camera_states  # Corrigido para state_threads
 from utilitarios import load_config
 
 def carregar_modelo():
@@ -14,3 +13,4 @@ def carregar_modelo():
     modelo.to("cuda")
     print("[YOLO] Modelo carregado com sucesso")
     return modelo
+
