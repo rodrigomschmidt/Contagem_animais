@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import threading
 from interface  import iniciar_interface
-from utilitarios import load_config, registrar_resultado, copiar_para_rede
+from utilitarios import load_config
 import requests
 from datetime import datetime
 import time
@@ -59,9 +59,8 @@ def main():
     url_placas = config[f"API_URL_PLACAS"]
     url_contagem = config[f"API_URL_CONTAGEM"]
 
-    # Preenche ip e rampa nos payloads
+    # Preenche rampa nos payloads
     for rampa in dict_placa.keys():
-        dict_payload[rampa]["ip"] = config[f"ip_{rampa}"]
         dict_payload[rampa]["rampa"] = rampa
 
 
