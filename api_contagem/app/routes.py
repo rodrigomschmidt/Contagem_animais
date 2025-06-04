@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from schemas import RequisicaoContador
-from state_threads import estados_cameras
+from states import estados_cameras
 
 router = APIRouter()
 

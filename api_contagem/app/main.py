@@ -1,13 +1,13 @@
 import os
 import sys
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from contagem import contagem
 from contextlib import asynccontextmanager
 from threading import Thread
-from routes_threads import router
+from routes import router
 from utilitarios import load_config
 from modelo import carregar_modelo
-from state_threads import EstadoContador, estados_cameras  # Importa yolo_lock de state
+from states import EstadoContador, estados_cameras  # Importa yolo_lock de state
 
 # Configurações do ambiente
 os.add_dll_directory(r"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin")
