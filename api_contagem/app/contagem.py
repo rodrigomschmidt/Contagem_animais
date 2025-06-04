@@ -1,9 +1,8 @@
 import cv2
-from state_threads import estados_cameras
 import os
 from utilitarios import trigger_manual_correction, copiar_para_rede, load_config, crop_para_5x4, converter_data
 import torch
-from state_threads import yolo_lock
+from states import yolo_lock, estados_cameras
 import gc
 
 config = load_config("config\config_contagem.txt")
@@ -181,11 +180,9 @@ def contagem(camera_id, modelo, url):
             cv2.putText(frame, f"Saidas: {out_count}", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
             cv2.putText(frame, f"Contagem: {in_count - out_count}", (50, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
             video_writer2.write(frame)
-            #cv2.imshow("Stream RTSP", frame)
-            #cv2.waitKey(1)
+            cv2.imshow("Stream RTSP", frame)
+            cv2.waitKey(1)
 
-            del resultados, frame
-            gc.collect()
             
             if frame_count % FRAME_CHECK_INTERVAL == 0:
                 torch.cuda.empty_cache()
