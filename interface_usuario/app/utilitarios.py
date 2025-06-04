@@ -47,19 +47,7 @@ def copiar_para_rede(caminho_local, caminho_rede):
 
 
 def load_config(config_file):
-    """
-    Carrega os pares chave=valor de um arquivo de configuração.
 
-    Args:
-        config_file (str): Caminho do arquivo.
-
-    Returns:
-        dict: Dicionário com as chaves e valores do arquivo.
-
-    Raises:
-        FileNotFoundError: Se o arquivo não for encontrado.
-        Exception: Para outros erros de leitura.
-    """
     config = {}
     try:
         with open(config_file, 'r') as f:
@@ -79,7 +67,7 @@ def load_config(config_file):
 
 
 def consultar_placas(data_abate):
-    """Consulta o banco SQL Server e retorna os dados das placas com a estrutura correta."""
+    #Consulta o banco SQL Server e retorna os dados das placas com a estrutura correta
     try:
         conn = pyodbc.connect(
             "DRIVER={ODBC Driver 18 for SQL Server};"

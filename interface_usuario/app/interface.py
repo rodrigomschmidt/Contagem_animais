@@ -1,14 +1,10 @@
 from datetime import datetime, timedelta
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import ttk
 import requests
 from utilitarios import consultar_placas, consultar_resultados_excel, load_config
-#import cv2
 import time
-import threading
-#import numpy as np
 from screeninfo import get_monitors
-import Levenshtein
 
 config = load_config("config/config.txt")
 
@@ -23,10 +19,8 @@ def aguardar_stream_pronto(api_url, tentativas=30, intervalo=1):
         time.sleep(intervalo)
     return False
 
-
 def iniciar_interface(root, caminho_excel, dict_placa):
 
-    
     popup = tk.Toplevel(root)
     popup.title("Contador")
     popup.lift()
