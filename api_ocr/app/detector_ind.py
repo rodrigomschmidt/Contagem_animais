@@ -117,6 +117,8 @@ def leitura_placas(rtsp_url, linha_p1, linha_p2, camera_id, model):
 
                     for box, conf in zip(boxes, confidences):
                         x1, y1, x2, y2 = box
+
+
                         crop = imagem[y1:y2, x1:x2]
 
                         crop_path = os.path.join(pasta_crops, f"crop_{camera_id}_{contador_crops}.jpg")
@@ -145,6 +147,8 @@ def leitura_placas(rtsp_url, linha_p1, linha_p2, camera_id, model):
                                 state.presenca = True
                                 state.melhor_placa = None
                                 state.melhor_conf = 0
+
+                            print(f"[YOLO] LADO ATUAL É {lado_atual}")
 
                             if lado_atual != 1:
                                 print(f"[YOLO] Detecção FORA da ROI (câmera {camera_id})")
@@ -177,6 +181,7 @@ def leitura_placas(rtsp_url, linha_p1, linha_p2, camera_id, model):
                                         maior_area = area_det
 
                                         if conf < CONF_THRESH or len(texto_limpo) < 6 or len(texto_limpo) > 8:
+                                            print("[OCR] CONF BAIXA - IGNORADO")
                                             continue
 
                                         if conf > state.melhor_conf:
@@ -187,12 +192,24 @@ def leitura_placas(rtsp_url, linha_p1, linha_p2, camera_id, model):
                             except Exception as e:
                                 print(f"[OCR] Erro (câmera {camera_id}): {e}")
                                 continue
-
-                    # Limpeza após cada frame
-                    del results, boxes, confidences, imagem
+                    
                     if frame_counter % 100 == 0:  # Limpar VRAM com mais frequência
                         torch.cuda.empty_cache()
-                    gc.collect()
+                        gc.collect()
+
+                    
+                    cv2.line(imagem, linha_p1, linha_p2, (0, 255, 0), 2)
+
+                    for box in boxes:
+                        x1, y1, x2, y2 = box
+                        cv2.rectangle(imagem, (x1, y1), (x2, y2), (0, 0, 255), 2)
+
+                    cv2.imshow(f"Camera {camera_id}", imagem)
+
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        print("[INFO] Tecla 'q' pressionada. Encerrando leitura.")
+                        cv2.destroyAllWindows()
+                        break
 
         except Exception as e:
             print(f"[RECONEXÃO] Erro crítico no stream (câmera {camera_id}): {e}. Reiniciando...")
@@ -208,3 +225,14 @@ def leitura_placas(rtsp_url, linha_p1, linha_p2, camera_id, model):
             torch.cuda.empty_cache()
             gc.collect()
             continue
+
+if __name__ == "__main__":
+    from ultralytics import YOLO
+    model = YOLO(r"C:\Users\rodrigo.schmidt\Documents\Python\Contagem_Animais\api_ocr\app\best_13.05.pt")
+    CAMERAS =  {
+        "id": "P1",
+        "rtsp_url": "rtsp://admin:czcz8910@192.168.42.55/Streaming/Channels/101?transport=tcp",
+        "linha_p1": (0, 500),
+        "linha_p2": (1280, 250)
+    }
+    leitura_placas(CAMERAS["rtsp_url"], CAMERAS["linha_p1"], CAMERAS["linha_p2"], CAMERAS["id"], model)

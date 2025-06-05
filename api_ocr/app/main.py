@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 from threading import Thread
 from ultralytics import YOLO
-from detector_threads import leitura_placas, get_placa_atual, get_estado_atual
+from detector import leitura_placas, get_placa_atual, get_estado_atual
 
 # Configurações do ambiente
 os.add_dll_directory(r"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin")
@@ -16,14 +16,14 @@ CAMERAS = [
     {
         "id": "P1",
         "rtsp_url": "rtsp://admin:czcz8910@192.168.42.54/Streaming/Channels/101?transport=tcp",
-        "linha_p1": (0, 433),
-        "linha_p2": (733, 0),
+        "linha_p1": (0, 500),
+        "linha_p2": (1280, 250)
     },
     {
         "id": "P5",
         "rtsp_url": "rtsp://admin:czcz8910@192.168.42.55/Streaming/Channels/101?transport=tcp",
         "linha_p1": (500, 720),
-        "linha_p2": (733, 0),
+        "linha_p2": (733, 0)
     },
 ]
 
@@ -70,4 +70,4 @@ def obter_estado(camera_id: str):
 if __name__ == "__main__":
     import uvicorn
     print("Subindo API Leitura de Placas")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8010)
