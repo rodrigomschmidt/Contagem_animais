@@ -3,6 +3,7 @@ import Levenshtein
 import time
 from datetime import datetime
 from utilitarios import registrar_resultado, copiar_para_rede, consultar_resultados_excel, load_config
+from tkinter import messagebox
 
 def leitura_placas(url_placas, dict_placa):
     try:
@@ -44,8 +45,10 @@ def loop_placas(url_placas, dict_placa, dict_payload, tree_sem, popup):
 
             placa_atual = dict_placa[rampa]["placa_lida"]
             for rampa in dict_placa.keys():
+                
                 melhor_placa = None
                 melhor_ordem = None
+
                 if dict_placa[rampa]["estado_anterior"] == True:
                     if dict_placa[rampa]["estado"] == False: #ou seja, trocou de estado, pois o anterior era True e o novo é falso - Caminhão saindo da rampa
                         
@@ -57,6 +60,13 @@ def loop_placas(url_placas, dict_placa, dict_payload, tree_sem, popup):
                         for resultado in resultados:
                             total_contado += resultado[4]
 
+                        if total_contado < dict_placa[rampa]["GTA"]:
+                            messagebox.showinfo("INFO", f"BOI A MENOS -- {dict_placa[rampa]["GTA"] - total_contado} A MENOS QUE A GTA")
+                        elif total_contado > dict_placa[rampa]["GTA"]:
+                            messagebox.showinfo("INFO", f"BOI A MAIS -- {total_contado - dict_placa[rampa]["GTA"]} A MAIS QUE A GTA")
+                        else:
+                            messagebox.showinfo("INFO", "QUANTIDADE CONTADA DE ACORDO COM A GTA")
+                        
                         print(f"O TOTAL CONTADO FOI DE {total_contado}")
 
                         popup.after(0, lambda r=rampa: dict_placa[r]["placa_var"].set(""))
@@ -116,13 +126,10 @@ def loop_placas(url_placas, dict_placa, dict_payload, tree_sem, popup):
                     popup.after(0, lambda r=rampa, o=melhor_ordem: dict_placa[r]["ordem_var"].set(o))
 
                     dict_placa[rampa]["GTA"] = gta_qtd
-
                     dict_payload[rampa]["placa"] = melhor_placa
                     dict_payload[rampa]["sequencial"] = "1"
                     dict_payload[rampa]["ordem_entrada"] = melhor_ordem
                     dict_payload[rampa]["data_abate"] = data_abate
-
-
 
             time.sleep(1.0)
 

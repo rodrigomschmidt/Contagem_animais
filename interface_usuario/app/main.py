@@ -1,10 +1,8 @@
 import tkinter as tk
-from tkinter import messagebox
 import threading
 from interface  import iniciar_interface
 from utilitarios import load_config
 import requests
-from datetime import datetime
 import time
 from monitoramento import loop_placas, loop_iniciar
 
@@ -16,8 +14,8 @@ dict_placa = {"P1": {"placa_lida": None, "placa_anterior": None, "estado": None,
               "P5": {"placa_lida": None, "placa_anterior": None, "estado": None, "estado_anterior": None, "ordem_var": None, "placa_var": None}}
 
 dict_payload = { "P1": {
-    "caminho_output_base": r"C:\teste_base",
-    "caminho_output_rede": r"\\srvbmflserver\BARRAMANSA\PUBLICO_BM\Rodrigo\Videos_novo",
+    "caminho_video_local": r"C:\teste_base",
+    "caminho_video_rede": r"\\srvbmflserver\BARRAMANSA\PUBLICO_BM\Rodrigo\Videos_novo",
     "placa": None,
     "sequencial": None,
     "ordem_entrada": None,
@@ -25,8 +23,8 @@ dict_payload = { "P1": {
     "rampa": "P1"  # ou "P5"
     },
     "P5": {
-    "caminho_output_base": r"C:\teste_base",
-    "caminho_output_rede": r"\\srvbmflserver\BARRAMANSA\PUBLICO_BM\Rodrigo\Videos_novo",
+    "caminho_video_local": r"C:\teste_base",
+    "caminho_video_rede": r"\\srvbmflserver\BARRAMANSA\PUBLICO_BM\Rodrigo\Videos_novo",
     "placa": None,
     "sequencial": None,
     "ordem_entrada": None,
@@ -62,7 +60,6 @@ def main():
     # Preenche rampa nos payloads
     for rampa in dict_placa.keys():
         dict_payload[rampa]["rampa"] = rampa
-
 
     tree_sem, tree_com, popup = iniciar_interface(root, caminho_excel, dict_placa)
     
