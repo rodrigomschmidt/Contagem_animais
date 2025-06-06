@@ -180,8 +180,8 @@ def contagem(camera_id, modelo, url):
             cv2.putText(frame, f"Saidas: {out_count}", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
             cv2.putText(frame, f"Contagem: {in_count - out_count}", (50, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
             video_writer2.write(frame)
-            cv2.imshow("Stream RTSP", frame)
-            cv2.waitKey(1)
+            #cv2.imshow("Stream RTSP", frame)
+            #cv2.waitKey(1)
 
             
             if frame_count % FRAME_CHECK_INTERVAL == 0:
