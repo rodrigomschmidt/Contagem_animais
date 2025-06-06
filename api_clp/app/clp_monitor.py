@@ -6,8 +6,7 @@ import time
 import requests
 
 monitorando_clp = True
-config = load_config("config_clp.txt")
-url_contagem = config["API_URL_CONTAGEM"]
+url_contagem = "http://10.1.2.23:8000"
 executando = {}
 liberar_contagem = {"P1": False, "P5": False}
 
@@ -27,8 +26,8 @@ def verificar_executando(url, rampa):
 def escutar_clp():
     global executando
 
-    deque_abertura = {"P1": deque(maxlen=5), "P5": deque(maxlen=5)}
-    deque_fechamento = {"P1": deque(maxlen=5), "P5": deque(maxlen=5)}
+    deque_abertura = {"P1": deque(maxlen=6), "P5": deque(maxlen=6)}
+    deque_fechamento = {"P1": deque(maxlen=6), "P5": deque(maxlen=6)}
     
     CLP_IP = '10.1.3.220'  
     PORTA = 502
