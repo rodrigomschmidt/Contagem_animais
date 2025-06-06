@@ -16,14 +16,14 @@ CAMERAS = [
     {
         "id": "P1",
         "rtsp_url": "rtsp://admin:czcz8910@192.168.42.54/Streaming/Channels/101?transport=tcp",
-        "linha_p1": (0, 500),
-        "linha_p2": (1280, 250)
+        "linha_p1": (0, 400),
+        "linha_p2": (1280, 200)
     },
     {
         "id": "P5",
         "rtsp_url": "rtsp://admin:czcz8910@192.168.42.55/Streaming/Channels/101?transport=tcp",
-        "linha_p1": (500, 720),
-        "linha_p2": (733, 0)
+        "linha_p1": (0, 500),
+        "linha_p2": (1280, 250)
     },
 ]
 

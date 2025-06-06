@@ -10,6 +10,10 @@ from paddleocr import PaddleOCR
 from datetime import datetime
 from threading import Lock
 
+# Configurações do ambiente
+os.add_dll_directory(r"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin")
+os.environ["OMP_NUM_THREADS"] = "1"
+
 # Configurações
 CONF_THRESH = 0.65
 clahe = cv2.createCLAHE(clipLimit=5.0, tileGridSize=(3, 3))
@@ -230,9 +234,9 @@ if __name__ == "__main__":
     from ultralytics import YOLO
     model = YOLO(r"C:\Users\rodrigo.schmidt\Documents\Python\Contagem_Animais\api_ocr\app\best_13.05.pt")
     CAMERAS =  {
-        "id": "P1",
-        "rtsp_url": "rtsp://admin:czcz8910@192.168.42.55/Streaming/Channels/101?transport=tcp",
-        "linha_p1": (0, 500),
-        "linha_p2": (1280, 250)
+        "id": "P5",
+        "rtsp_url": "rtsp://admin:czcz8910@192.168.42.54/Streaming/Channels/101?transport=tcp",
+        "linha_p1": (0, 400),
+        "linha_p2": (1280, 200)
     }
     leitura_placas(CAMERAS["rtsp_url"], CAMERAS["linha_p1"], CAMERAS["linha_p2"], CAMERAS["id"], model)
