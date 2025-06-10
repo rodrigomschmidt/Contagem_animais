@@ -19,11 +19,11 @@ CAMERAS = [
     {
         "id": "P1",
         "url_key": "url_p1",
-    },
-    {
-        "id": "P5",
-        "url_key": "url_p5",
-    },
+    }
+    #{
+    #    "id": "P5",
+    #    "url_key": "url_p5",
+    #},
 ]
 
 @asynccontextmanager

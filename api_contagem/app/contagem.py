@@ -4,6 +4,7 @@ from utilitarios import trigger_manual_correction, copiar_para_rede, load_config
 import torch
 from states import yolo_lock, estados_cameras
 import gc
+import time
 
 config = load_config("config\config_contagem.txt")
 
@@ -23,6 +24,11 @@ def contagem(camera_id, modelo, url):
     LINE_2 = 460
     LIMITE_MAXIMO = 0.6 * w * h
     FRAME_CHECK_INTERVAL = 1200
+    MAX_TENTATIVAS = 20
+
+    video_writer = None
+    video_writer2 = None
+    falhas_consecutivas = 0
 
     # Tenta abrir a conexão
     cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
@@ -37,7 +43,23 @@ def contagem(camera_id, modelo, url):
     while True:
         ret, frame = cap.read()
         if not ret:
-            print("[AVISO] Falha ao ler frame.")
+            print("[AVISO] Falha ao ler frame. Tentando reconexão")
+            cap.release()
+            time.sleep(1)
+            cap= cv2.VideoCapture(url, cv2.CAP_FFMPEG)
+            if not cap.isOpened():
+                falhas_consecutivas += 1
+                print(f"[ERRO] RECONEXÃO FALHOU {falhas_consecutivas}/{MAX_TENTATIVAS}")
+                if falhas_consecutivas >= MAX_TENTATIVAS:
+                    estados_cameras[camera_id].reset()
+                    gc.collect()
+                    torch.cuda.empty_cache()
+                    torch.cuda.synchronize()
+                    cap.release()
+                    return
+            else:
+                print("CONEXÃO RESTABELECIDA")
+                falhas_consecutivas = 0 
             continue
 
         if estados_cameras[camera_id].get_executando():
@@ -121,17 +143,17 @@ def contagem(camera_id, modelo, url):
 
                 #cv2.destroyAllWindows()
 
-                # Copiar vídeos para rede
-                if nome_video and nome_video_rede:
-                    copiar_para_rede(nome_video, nome_video_rede)
-                if nome_video2 and nome_video_rede:
-                    copiar_para_rede(nome_video2, nome_video_rede)
-
                 # Liberação dos recursos
                 if video_writer:
                     video_writer.release()
                 if video_writer2:
                     video_writer2.release()
+
+                # Copiar vídeos para rede
+                if nome_video and nome_video_rede:
+                    copiar_para_rede(nome_video, nome_video_rede)
+                if nome_video2 and nome_video_rede:
+                    copiar_para_rede(nome_video2, nome_video_rede)
 
                 gc.collect()
                 torch.cuda.empty_cache()
@@ -180,9 +202,12 @@ def contagem(camera_id, modelo, url):
             cv2.putText(frame, f"Saidas: {out_count}", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
             cv2.putText(frame, f"Contagem: {in_count - out_count}", (50, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
             video_writer2.write(frame)
+            
             #cv2.imshow("Stream RTSP", frame)
             #cv2.waitKey(1)
 
+            contagem = in_count - out_count
+            estados_cameras[camera_id].resultado = contagem
             
             if frame_count % FRAME_CHECK_INTERVAL == 0:
                 torch.cuda.empty_cache()
