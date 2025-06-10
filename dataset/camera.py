@@ -9,16 +9,27 @@ class Camera():
         self.cap = None
 
     def conectar(self):
+        
         if self.cap is None or not self.cap.isOpened():
+            print(f"[CAMERA] TENTANDO CONECTAR À CAMERA {self.id if self.id else self.url}")
             self.cap = cv2.VideoCapture(self.url, cv2.CAP_FFMPEG)
-        return self.cap
+            if self.cap.isOpened():
+                print(f"[CAMERA] CONTECTADO À CAMERA {self.id if self.id else self.url}")
+                return True
+            else:
+                print(f"[CAMERA] FALHA AO CONECTAR À CAMERA {self.id if self.id else self.url}")
+                return False
+        return True
     
+    def check_stream(self):
+        return self.cap.isOpened()
+
     def ler_frame(self):
-        
+
         if not self.cap.isOpened():
-            print(f"Erro ao conectar à câmera {self.id}" )
+            print(f"[CAMERA] FALHA AO CONECTAR À CAMERA {self.id if self.id else self.url}" )
             return None
-        
+
         ret, frame = self.cap.read()
 
         if not ret:
