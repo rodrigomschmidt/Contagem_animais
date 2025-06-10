@@ -4,6 +4,7 @@ import time
 from datetime import datetime
 from utilitarios import registrar_resultado, copiar_para_rede, consultar_resultados_excel, load_config
 from tkinter import messagebox
+from requisicoes import get_executando, get_resultado
 
 def leitura_placas(url_placas, dict_placa):
     try:
@@ -33,7 +34,7 @@ def leitura_placas(url_placas, dict_placa):
     
     return
 
-def loop_placas(url_placas, dict_placa, dict_payload, tree_sem, popup):
+def loop_placas(url_placas, dict_placa, dict_payload, tree_sem, popup, url_contagem):
 
         # enquanto a janela existir, roda o loop
         while True:
@@ -41,7 +42,26 @@ def loop_placas(url_placas, dict_placa, dict_payload, tree_sem, popup):
                 dict_placa[rampa]["estado_anterior"] = dict_placa[rampa]["estado"]
                 dict_placa[rampa]["placa_anterior"] = dict_placa[rampa]["placa_lida"]
 
+                status = get_executando(url_contagem, rampa)
+                print(f"CONFERINDO STATUS DA CONTAGEM DE {rampa} - O STATUS É DE {status}")
+
+                if status:
+                    dict_placa[rampa]["status_var"].set("Em execução")
+                    dict_placa[rampa]["label_status"].config(fg="green")
+                else:
+                    dict_placa[rampa]["status_var"].set("Aguardando")
+                    dict_placa[rampa]["label_status"].config(fg="red")
+
+                contagem = get_resultado(url_contagem, rampa)
+                if contagem is not None:
+                    if status:
+                        dict_placa[rampa]["cont_var"].set(f"Contagem atual = {contagem}")
+                    else:
+                        dict_placa[rampa]["cont_var"].set("-")
+                
+
             leitura_placas(url_placas, dict_placa)
+            
 
             placa_atual = dict_placa[rampa]["placa_lida"]
             for rampa in dict_placa.keys():
@@ -53,19 +73,30 @@ def loop_placas(url_placas, dict_placa, dict_payload, tree_sem, popup):
                     if dict_placa[rampa]["estado"] == False: #ou seja, trocou de estado, pois o anterior era True e o novo é falso - Caminhão saindo da rampa
                         
                         caminho_excel = load_config("config\config.txt")["caminho_excel"]
-                        resultados = consultar_resultados_excel(caminho_excel, dict_placa[rampa]["placa_var"], dict_placa[rampa]["ordem_var"])
+
+                        if not dict_placa[rampa]["placa_var"].get() and not dict_placa[rampa]["ordem_var"].get():
+                            continue
+                        
+                        placa_var = dict_placa[rampa]["placa_var"].get()
+                        ordem_var = dict_placa[rampa]["ordem_var"].get()
+                            
+                        resultados = consultar_resultados_excel(caminho_excel, placa_var, ordem_var)
                         
                         total_contado = 0
                         
-                        for resultado in resultados:
-                            total_contado += resultado[4]
+                        gta = dict_placa[rampa]["gta"]
 
-                        if total_contado < dict_placa[rampa]["GTA"]:
-                            messagebox.showinfo("INFO", f"BOI A MENOS -- {dict_placa[rampa]["GTA"] - total_contado} A MENOS QUE A GTA")
-                        elif total_contado > dict_placa[rampa]["GTA"]:
-                            messagebox.showinfo("INFO", f"BOI A MAIS -- {total_contado - dict_placa[rampa]["GTA"]} A MAIS QUE A GTA")
-                        else:
-                            messagebox.showinfo("INFO", "QUANTIDADE CONTADA DE ACORDO COM A GTA")
+                        if len(resultados) > 0:
+                            for resultado in resultados:
+                                total_contado = total_contado + resultado[4]
+
+                            if dict_placa[rampa]["gta"] is not None: 
+                                if total_contado < gta:
+                                    messagebox.showinfo("INFO", f"{total_contado} BOIS -- {gta - total_contado} A MENOS QUE A GTA")
+                                elif total_contado > gta:
+                                    messagebox.showinfo("INFO", f"{total_contado} BOIS-- {total_contado - gta} A MAIS QUE A GTA")
+                                else:
+                                    messagebox.showinfo("INFO", f"{total_contado} BOIS - QUANTIDADE CONTADA DE ACORDO COM A GTA")
                         
                         print(f"O TOTAL CONTADO FOI DE {total_contado}")
 
@@ -110,7 +141,6 @@ def loop_placas(url_placas, dict_placa, dict_payload, tree_sem, popup):
                                 menor_d = d 
                                 if placa_ais == melhor_placa:
                                     if int(ordem_ais) < int(melhor_ordem):
-
                                         melhor_placa = placa_ais
                                         melhor_ordem = ordem_ais
                                         gta_qtd = qtd_gta_ais
@@ -125,7 +155,7 @@ def loop_placas(url_placas, dict_placa, dict_payload, tree_sem, popup):
                     popup.after(0, lambda r=rampa, p=melhor_placa: dict_placa[r]["placa_var"].set(p))
                     popup.after(0, lambda r=rampa, o=melhor_ordem: dict_placa[r]["ordem_var"].set(o))
 
-                    dict_placa[rampa]["GTA"] = gta_qtd
+                    dict_placa[rampa]["gta"] = gta_qtd
                     dict_payload[rampa]["placa"] = melhor_placa
                     dict_payload[rampa]["sequencial"] = "1"
                     dict_payload[rampa]["ordem_entrada"] = melhor_ordem

@@ -10,8 +10,8 @@ config = load_config("config/config.txt")
 
 url_placas = None
 
-dict_placa = {"P1": {"placa_lida": None, "placa_anterior": None, "estado": None, "estado_anterior": None, "ordem_var": None, "placa_var": None},
-              "P5": {"placa_lida": None, "placa_anterior": None, "estado": None, "estado_anterior": None, "ordem_var": None, "placa_var": None}}
+dict_placa = {"P1": {"placa_lida": None, "placa_anterior": None, "estado": None, "estado_anterior": None, "ordem_var": None, "placa_var": None, "status_var": None, "cont_var": None, "label_status": None, "gta": None},
+              "P5": {"placa_lida": None, "placa_anterior": None, "estado": None, "estado_anterior": None, "ordem_var": None, "placa_var": None, "status_var": None, "cont_var": None, "label_status": None, "gta": None}}
 
 dict_payload = { "P1": {
     "caminho_video_local": r"C:\teste_base",
@@ -49,7 +49,6 @@ def aguardar_fim_da_contagem(API_URL):
 
 def main():
     caminho_excel = config["caminho_excel"]
-    caminho_excel_rede = config["caminho_excel_rede"]
     url_clp = config["URL_CLP"]
     root = tk.Tk()
     root.withdraw()
@@ -63,7 +62,7 @@ def main():
 
     tree_sem, tree_com, popup = iniciar_interface(root, caminho_excel, dict_placa)
     
-    t1 = threading.Thread(target=loop_placas, args=(url_placas, dict_placa, dict_payload, tree_sem, popup,), daemon=True)
+    t1 = threading.Thread(target=loop_placas, args=(url_placas, dict_placa, dict_payload, tree_sem, popup, url_contagem,), daemon=True,)
     t1.start()
 
     t2 = threading.Thread(target=loop_iniciar, args=(url_clp, dict_payload, url_contagem, config, dict_sequenciais,), daemon=True)

@@ -1,23 +1,11 @@
 from datetime import datetime, timedelta
 import tkinter as tk
 from tkinter import ttk
-import requests
 from utilitarios import consultar_placas, consultar_resultados_excel, load_config
-import time
 from screeninfo import get_monitors
 
 config = load_config("config/config.txt")
 
-def aguardar_stream_pronto(api_url, tentativas=30, intervalo=1):
-    for i in range(tentativas):
-        try:
-            resposta = requests.get(f"{api_url}/stream_pronto", timeout=2)
-            if resposta.ok and resposta.json().get("pronto"):
-                return True
-        except Exception as e:
-            print(f"Tentativa {i+1}/{tentativas} - stream não pronto: {e}")
-        time.sleep(intervalo)
-    return False
 
 def iniciar_interface(root, caminho_excel, dict_placa):
 
@@ -53,6 +41,12 @@ def iniciar_interface(root, caminho_excel, dict_placa):
     # ESQUERDA CIMA (P1)
     frame_p1 = tk.LabelFrame(frame_esquerda, text="Rampa P1", font=fonte)
     frame_p1.pack(side=tk.TOP, fill=tk.X, padx=5, pady=(0,10))
+    dict_placa["P1"]["status_var"] = tk.StringVar()
+    label_status_p1 = tk.Label(frame_p1, textvariable=dict_placa["P1"]["status_var"], font=fonte, fg="red")
+    label_status_p1.pack(anchor="w", padx=5, pady=2)
+    dict_placa["P1"]["label_status"] = label_status_p1
+    dict_placa["P1"]["cont_var"] = tk.StringVar()
+    tk.Label(frame_p1, textvariable=dict_placa["P1"]["cont_var"], font=fonte).pack(anchor="w", padx=5, pady=2)
     tk.Label(frame_p1, text="Placa P1:", font=fonte).pack(anchor="w", padx=5, pady=2)
     dict_placa["P1"]["placa_var"] = tk.StringVar()
     tk.Entry(frame_p1, textvariable=dict_placa["P1"]["placa_var"], font=fonte, state="readonly").pack(fill=tk.X, padx=5, pady=2)
@@ -63,6 +57,12 @@ def iniciar_interface(root, caminho_excel, dict_placa):
     # DIREITA BAIXO (P5)
     frame_p5 = tk.LabelFrame(frame_esquerda, text="Rampa P5", font=fonte)
     frame_p5.pack(side=tk.TOP, fill=tk.X, padx=5, pady=(10,0))
+    dict_placa["P5"]["status_var"] = tk.StringVar()
+    label_status_p5 = tk.Label(frame_p5, textvariable=dict_placa["P5"]["status_var"], font=fonte, fg="red")
+    label_status_p5.pack(anchor="w", padx=5, pady=2)
+    dict_placa["P5"]["label_status"] = label_status_p5
+    dict_placa["P5"]["cont_var"] = tk.StringVar()
+    tk.Label(frame_p5, textvariable=dict_placa["P5"]["cont_var"], font=fonte).pack(anchor="w", padx=5, pady=2)
     tk.Label(frame_p5, text="Placa P5:", font=fonte).pack(anchor="w", padx=5, pady=2)
     dict_placa["P5"]["placa_var"] = tk.StringVar()
     tk.Entry(frame_p5, textvariable=dict_placa["P5"]["placa_var"], font=fonte, state="readonly").pack(fill=tk.X, padx=5, pady=2)
